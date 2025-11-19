@@ -41,6 +41,10 @@ export default function LoginPage() {
       console.error(err);
       setError("Something went wrong. Please try again.");
     }
+
+    // Added token expiration becouase i was not able to check protected routes access
+    const tokenExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
+    localStorage.setItem("tokenExpiry", tokenExpiry.toString());
   };
 
   return (

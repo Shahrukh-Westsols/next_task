@@ -11,8 +11,16 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
 
+  // Initialize user directly without useEffect
+  const [user] = useState(() => {
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      return userData ? JSON.parse(userData) : null;
+    }
+    return null;
+  });
+
   const handleAddTask = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("token");
 
     if (!newTask.trim()) return;
@@ -151,7 +159,6 @@ export default function TasksPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const user = JSON.parse(localStorage.getItem("user"));
       const token = localStorage.getItem("token");
 
       if (!user || !token) {
@@ -175,7 +182,11 @@ export default function TasksPage() {
         }
       } catch (err) {
         console.error(err);
-        setError("Something went wrong");
+        if (err.message.includes("JSON")) {
+          setError("Server error - please try again later");
+        } else {
+          setError("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }
@@ -185,12 +196,30 @@ export default function TasksPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <p>Loading tasks...</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3">Loading tasks...</span>
+      </div>
+    );
+
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white p-8">
-      <h1 className="text-3xl font-bold mb-6">Your Tasks</h1>
+      {/* Add user welcome message */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Your Tasks</h1>
+        {user && (
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            Welcome back,{" "}
+            <span className="font-semibold text-blue-600">{user.username}</span>
+            ! You have {tasks.length} task{tasks.length !== 1 ? "s" : ""}.
+          </p>
+        )}
+      </div>
+
       <div className="mb-6 flex gap-2">
         <input
           type="text"
