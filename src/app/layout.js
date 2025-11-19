@@ -1,5 +1,6 @@
 import "./globals.css";
-import Navbar from "./components/Navbar";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export const metadata = {
   title: "Task App",
@@ -10,8 +11,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-white text-black dark:bg-black dark:text-white">
-        <Navbar />
+        <Header />
         <main className="p-8">{children}</main>
+        <Footer />
       </body>
     </html>
   );
