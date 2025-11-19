@@ -11,13 +11,13 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
 
-  // Initialize user directly without useEffect
   const [user] = useState(() => {
-    if (typeof window !== "undefined") {
+    try {
       const userData = localStorage.getItem("user");
       return userData ? JSON.parse(userData) : null;
+    } catch {
+      return null;
     }
-    return null;
   });
 
   const handleAddTask = async () => {
@@ -193,8 +193,7 @@ export default function TasksPage() {
     };
 
     fetchTasks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user, API_URL]);
 
   if (loading)
     return (
@@ -208,7 +207,6 @@ export default function TasksPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white p-8">
-      {/* Add user welcome message */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Your Tasks</h1>
         {user && (

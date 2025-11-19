@@ -3,27 +3,26 @@
 import Navbar from "./Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function Header() {
-  // Initialize user state directly from localStorage
-  const [user] = useState(() => {
-    if (typeof window !== "undefined") {
-      const userData = localStorage.getItem("user");
-      return userData ? JSON.parse(userData) : null;
-    }
-    return null;
-  });
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "/";
   };
 
+  const getUser = () => {
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      return userData ? JSON.parse(userData) : null;
+    }
+    return null;
+  };
+
+  const user = getUser();
+
   return (
     <header className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-      {/* Logo and App Name - Clickable to Home */}
       <Link href="/" className="flex items-center gap-3 mr-8">
         <Image
           src="/task_logo.png"
@@ -39,7 +38,6 @@ export default function Header() {
       </Link>
 
       <div className="flex items-center gap-4">
-        {/* Show user info if logged in */}
         {user && (
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600 dark:text-gray-300">
