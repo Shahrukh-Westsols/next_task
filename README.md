@@ -2,7 +2,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+# Task App Project
+
+## Frontend
+
+- Built with Next.js
 
 ```bash
 npm run dev
@@ -13,6 +17,22 @@ pnpm dev
 # or
 bun dev
 ```
+
+- `npm run dev` to start
+
+## Backend
+
+- Node.js server in task_management_server
+- `node server.js` to run backend
+
+you need 2 terminals in vs code in order to run both so we the project runs
+by default you will be in task_app so you can run
+
+- `npm run dev` to start
+
+for backend open new terminal go to cd task_management_server
+
+- `node server.js` to run backend
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
