@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Popup from "../components/Popup";
 
 export default function TasksPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -10,6 +11,8 @@ export default function TasksPage() {
   const [newTask, setNewTask] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   const [user] = useState(() => {
     try {
@@ -53,6 +56,44 @@ export default function TasksPage() {
       console.error(err);
       alert("Something went wrong");
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    setTaskToDelete(id);
+    setShowDeletePopup(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!taskToDelete) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${API_URL}/tasks/${taskToDelete}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to delete task");
+      } else {
+        setTasks(tasks.filter((task) => task.tasks_id !== taskToDelete));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while deleting task");
+    } finally {
+      setShowDeletePopup(false);
+      setTaskToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeletePopup(false);
+    setTaskToDelete(null);
   };
 
   const handleDeleteTask = async (id) => {
@@ -304,7 +345,8 @@ export default function TasksPage() {
                 Update
               </button>
               <button
-                onClick={() => handleDeleteTask(task.tasks_id)}
+                // onClick={() => handleDeleteTask(task.tasks_id)}
+                onClick={() => handleDeleteClick(task.tasks_id)}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
               >
                 Delete
@@ -313,6 +355,12 @@ export default function TasksPage() {
           </li>
         ))}
       </ul>
+      <Popup
+        isOpen={showDeletePopup}
+        message="Are you sure you want to delete this task?"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }
