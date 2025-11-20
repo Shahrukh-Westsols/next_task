@@ -3,22 +3,22 @@
 import Navbar from "./Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Popup from "./Popup";
 
 export default function Header() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const getUser = () => {
-    try {
-      const userData = localStorage.getItem("user");
-      return userData ? JSON.parse(userData) : null;
-    } catch {
-      return null;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-  };
-
-  const user = getUser();
+  }, []);
 
   const handleLogoutClick = () => {
     setShowLogoutPopup(true);
@@ -27,6 +27,7 @@ export default function Header() {
   const confirmLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setUser(null);
     setShowLogoutPopup(false);
     window.location.href = "/";
   };
@@ -34,6 +35,33 @@ export default function Header() {
   const cancelLogout = () => {
     setShowLogoutPopup(false);
   };
+
+  // Don't render user-specific content until mounted
+  if (!mounted) {
+    return (
+      <header className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/task_logo.png"
+              alt="Task App Logo"
+              width={48}
+              height={48}
+              className="rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 shadow-sm"
+              priority
+            />
+            <h1 className="text-xl font-bold spiral-text whitespace-nowrap">
+              TaskFlow
+            </h1>
+          </Link>
+          <div className="flex-1 flex justify-center">
+            <Navbar user={null} />
+          </div>
+          <div className="min-w-[200px]"></div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <>
