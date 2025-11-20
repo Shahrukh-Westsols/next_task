@@ -18,7 +18,7 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">
       <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl">
         <div className="text-center">
-          <h1 className="text-5xl font-bold mb-6 bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-purple-600 hover:to-blue-600 transition-all duration-500">
+          <h1 className="text-5xl font-bold mb-6 spiral-text">
             {user ? `Welcome back, ${user.username}!` : "Welcome to TaskFlow"}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">

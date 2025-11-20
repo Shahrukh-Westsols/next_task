@@ -29,3 +29,35 @@ body {
 * {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
+
+@keyframes spiralLines {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+.spiral-text {
+  background: linear-gradient(
+    120deg,
+    #3b82f6 20%,
+    #6366f1 30%,
+    #8b5cf6 40%,
+    #a855f7 50%,
+    #8b5cf6 60%,
+    #6366f1 70%,
+    #3b82f6 80%
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: spiralLines 8s ease-in-out infinite;
+  color: #3b82f6; /* This keeps the text visible when gradient isn't covering it */
+}
+
+.spiral-text:hover {
+  animation-duration: 4s;
+}

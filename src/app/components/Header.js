@@ -48,7 +48,7 @@ export default function Header() {
               className="rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 shadow-sm"
               priority
             />
-            <h1 className="text-xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap hover:from-purple-600 hover:to-blue-600 transition-all duration-500">
+            <h1 className="text-xl font-bold spiral-text whitespace-nowrap">
               TaskFlow
             </h1>
           </Link>
