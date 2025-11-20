@@ -2,80 +2,39 @@ import Link from "next/link";
 
 export default function Navbar({ user = null }) {
   return (
-    <nav className="flex gap-6">
-      <Link href="/" className="hover:text-blue-600">
+    <nav className="flex items-center gap-1 bg-linear-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl px-3 py-2 shadow-lg border border-gray-200 dark:border-gray-700">
+      <Link
+        href="/"
+        className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium"
+      >
         Home
       </Link>
 
       <Link
         href="/login"
-        className={`hover:text-blue-600 ${user ? "hidden" : "block"}`}
+        className={`px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium ${
+          user ? "hidden" : "block"
+        }`}
       >
         Login
       </Link>
       <Link
         href="/register"
-        className={`hover:text-blue-600 ${user ? "hidden" : "block"}`}
+        className={`px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium ${
+          user ? "hidden" : "block"
+        }`}
       >
         Register
       </Link>
 
       <Link
         href="/tasks"
-        className={`hover:text-blue-600 ${user ? "block" : "hidden"}`}
+        className={`px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium ${
+          user ? "block" : "hidden"
+        }`}
       >
         My Tasks
       </Link>
     </nav>
   );
 }
-
-// import Link from "next/link";
-
-// export default function Navbar({ user }) {
-//   return (
-//     <nav className="flex gap-6">
-//       <Link href="/" className="hover:text-blue-600">
-//         Home
-//       </Link>
-
-//       {!user && (
-//         <>
-//           <Link href="/login" className="hover:text-blue-600">
-//             Login
-//           </Link>
-//           <Link href="/register" className="hover:text-blue-600">
-//             Register
-//           </Link>
-//         </>
-//       )}
-
-//       {user && (
-//         <Link href="/tasks" className="hover:text-blue-600">
-//           My Tasks
-//         </Link>
-//       )}
-//     </nav>
-//   );
-// }
-
-// import Link from "next/link";
-
-// export default function Navbar() {
-//   return (
-//     <header className="w-full bg-gray-100 dark:bg-gray-900 p-4 flex gap-6 shadow">
-//       <Link href="/" className="hover:text-blue-600">
-//         Home
-//       </Link>
-//       <Link href="/login" className="hover:text-blue-600">
-//         Login
-//       </Link>
-//       <Link href="/register" className="hover:text-blue-600">
-//         Register
-//       </Link>
-//       <Link href="/tasks" className="hover:text-blue-600">
-//         Tasks
-//       </Link>
-//     </header>
-//   );
-// }
