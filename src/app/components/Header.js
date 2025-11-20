@@ -57,22 +57,21 @@ export default function Header() {
             <Navbar user={user} />
           </div>
 
-          <div className="flex items-center gap-3">
-            {user && (
-              <>
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Welcome,{" "}
-                  <span className="font-semibold">{user.username}</span>
-                </span>
-                <button
-                  onClick={handleLogoutClick}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
-                >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Welcome, <span className="font-semibold">{user.username}</span>
+              </span>
+              <button
+                onClick={handleLogoutClick}
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="min-w-[200px]"></div>
+          )}
         </div>
       </header>
 
