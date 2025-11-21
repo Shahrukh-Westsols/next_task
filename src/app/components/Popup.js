@@ -5,9 +5,7 @@ export default function Popup({ isOpen, message, onConfirm, onCancel }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Remove pointer-events-none from parent */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl max-w-sm mx-4 border border-gray-200 dark:border-gray-700">
-        {/* Remove pointer-events-auto - not needed */}
         <p className="mb-4 text-gray-800 dark:text-white text-center font-medium">
           {message}
         </p>

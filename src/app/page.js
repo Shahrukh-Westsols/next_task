@@ -2,17 +2,81 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [user] = useState(() => {
+  const [user, setUser] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
     try {
       const userData = localStorage.getItem("user");
-      return userData ? JSON.parse(userData) : null;
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
     } catch {
-      return null;
+      setUser(null);
     }
-  });
+  }, []);
+
+  // Show loading state during hydration
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">
+        <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-6 spiral-text">
+              Welcome to TaskFlow
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
+              The simple and powerful task management app that helps you stay
+              organized and productive.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl">
+            <div className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-lg shadow-md text-center transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-lg border border-blue-200 dark:border-blue-700">
+              <div className="text-2xl mb-4">📝</div>
+              <h3 className="font-bold text-lg mb-2">Create Tasks</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Easily add and organize your daily tasks
+              </p>
+            </div>
+
+            <div className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-lg shadow-md text-center transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-lg border border-green-200 dark:border-green-700">
+              <div className="text-2xl mb-4">✅</div>
+              <h3 className="font-bold text-lg mb-2">Manage Progress</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Update and track your task completion
+              </p>
+            </div>
+
+            <div className="bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 rounded-lg shadow-md text-center transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-lg border border-purple-200 dark:border-purple-700">
+              <div className="text-2xl mb-4">🔒</div>
+              <h3 className="font-bold text-lg mb-2">Secure & Private</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Your tasks are safe and only visible to you
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Ready to Get Organized?</h2>
+            <div className="flex gap-4 justify-center">
+              <div className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold opacity-50">
+                Get Started Free
+              </div>
+              <div className="px-8 py-3 border border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold opacity-50">
+                Login
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">

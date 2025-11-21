@@ -19,6 +19,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -29,14 +30,27 @@ export default function LoginPage() {
         return;
       }
 
-      // Storing JWT in localStorage
-      localStorage.setItem("token", data.token);
+      if (!data.token) {
+        setError("No token received from server");
+        return;
+      }
 
-      // Storing user info
+      console.log("Login response data:", data);
+
+      // Storing JWT in localStorage
+      // localStorage.setItem("token", data.token);
+      // Storing JWT in cookie instead of localStorage for  24 hours
+      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+      console.log(
+        "Cookie set with token:",
+        data.token.substring(0, 20) + "..."
+      );
+
+      // Storing user info for client side use
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Redirect to /tasks page
-      window.location.href = "/tasks";
+      // Redirect to / home page
+      window.location.href = "/";
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");

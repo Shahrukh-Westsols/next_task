@@ -24,7 +24,7 @@ export default function TasksPage() {
   });
 
   const handleAddTask = async () => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     if (!newTask.trim()) return;
 
@@ -33,12 +33,13 @@ export default function TasksPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ user_id: user.user_id, content: newTask }),
+        credentials: "include",
+        body: JSON.stringify({ content: newTask }),
       });
 
-      // Check if the response is JSON
+      // Check if the response is JSON becouse we were having errors of getting https page when backend was not synced and next was sending https error page
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error("Server did not return JSON");
@@ -66,13 +67,14 @@ export default function TasksPage() {
   const confirmDelete = async () => {
     if (!taskToDelete) return;
 
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API_URL}/tasks/${taskToDelete}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -97,14 +99,15 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (id) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     try {
       const res = await fetch(`${API_URL}/tasks/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -121,7 +124,7 @@ export default function TasksPage() {
   };
 
   const handleUpdateTask = async (task) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     const newContent = prompt("Update task", task.content);
     if (!newContent) return;
@@ -131,8 +134,9 @@ export default function TasksPage() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           content: newContent,
           completed: task.completed,
@@ -155,14 +159,15 @@ export default function TasksPage() {
   };
 
   const handleMoveUp = async (id) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     // Update backend
     await fetch(`${API_URL}/tasks/${id}/move-up`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
+      // headers: {
+      //   // Authorization: `Bearer ${token}`,
+      // },
     });
 
     // Update UI locally
@@ -177,14 +182,15 @@ export default function TasksPage() {
   };
 
   const handleMoveDown = async (id) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     // Update backend
     await fetch(`${API_URL}/tasks/${id}/move-down`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
+      // headers: {
+      //   // Authorization: `Bearer ${token}`,
+      // },
     });
 
     // Update UI locally
@@ -200,18 +206,25 @@ export default function TasksPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
 
-      if (!user || !token) {
-        window.location.href = "/login"; // redirect if not logged in
-        return;
-      }
+      // if (!user || !token) {
+      //   window.location.href = "/login"; // redirect if not logged in
+      //   return;
+      // }
+      // no need now we have middleware on frontent as well
+      // if (!user) {
+      //   window.location.href = "/login";
+      //   return;
+      // }
 
       try {
-        const res = await fetch(`${API_URL}/tasks?user_id=${user.user_id}`, {
+        // const res = await fetch(`${API_URL}/tasks?user_id=${user.user_id}`, {
+        const res = await fetch(`${API_URL}/tasks`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            // Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         });
 
         const data = await res.json();
@@ -287,15 +300,16 @@ export default function TasksPage() {
                   value={editingContent}
                   onChange={(e) => setEditingContent(e.target.value)}
                   onBlur={async () => {
-                    const token = localStorage.getItem("token");
+                    // const token = localStorage.getItem("token");
                     const res = await fetch(
                       `${API_URL}/tasks/${task.tasks_id}`,
                       {
                         method: "PUT",
                         headers: {
                           "Content-Type": "application/json",
-                          Authorization: `Bearer ${token}`,
+                          // Authorization: `Bearer ${token}`,
                         },
+                        credentials: "include",
                         body: JSON.stringify({
                           content: editingContent,
                           completed: task.completed,

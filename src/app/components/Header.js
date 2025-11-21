@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Popup from "./Popup";
 
 export default function Header() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState(null);
@@ -24,7 +25,15 @@ export default function Header() {
     setShowLogoutPopup(true);
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
+    // Removing token from cookies and local storage
+    // document.cookie =
+    //   "token=; Path=/; SameSite=Lax; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include", // important to send cookies
+    });
+    console.log("Backend logout response:", response.status);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
@@ -36,7 +45,6 @@ export default function Header() {
     setShowLogoutPopup(false);
   };
 
-  // Don't render user-specific content until mounted
   if (!mounted) {
     return (
       <header className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
@@ -90,6 +98,16 @@ export default function Header() {
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 Welcome, <span className="font-semibold">{user.username}</span>
               </span>
+
+              {user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition text-sm"
+                >
+                  Admin Panel
+                </Link>
+              )}
+
               <button
                 onClick={handleLogoutClick}
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm"
