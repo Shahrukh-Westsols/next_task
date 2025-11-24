@@ -15,12 +15,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    // const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      // const res = await fetch(`${API_URL}/auth/register`, {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, email, password }),
       });
 
@@ -30,6 +32,10 @@ export default function RegisterPage() {
         setError(data.message || "Registration failed");
         return;
       }
+      // Storing user data in localStorage for client-side UI,
+      // if (data.user) {
+      //   localStorage.setItem("user", JSON.stringify(data.user));
+      // }
 
       setShowSuccessPopup(true);
     } catch (err) {

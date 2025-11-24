@@ -21,7 +21,6 @@ export default function Home() {
     }
   }, []);
 
-  // Show loading state during hydration
   if (!mounted) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">

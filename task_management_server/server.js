@@ -106,6 +106,7 @@ app.post("/auth/login", async (req, res) => {
       sameSite: "lax", // Changed from "strict" to "lax"
       // secure: isProduction, // true in production, false in development
       // sameSite: isProduction ? "strict" : "lax",
+      path: "/",
       maxAge: 60 * 60 * 1000,
     });
 
@@ -130,8 +131,8 @@ app.post("/auth/logout", (req, res) => {
     httpOnly: true,
     secure: false,
     sameSite: "lax",
-    expires: new Date(0),
     path: "/",
+    expires: new Date(0),
   });
 
   res.json({ message: "Logged out successfully" });

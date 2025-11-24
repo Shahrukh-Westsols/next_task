@@ -31,7 +31,7 @@ export default function Header() {
     //   "token=; Path=/; SameSite=Lax; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT;";
     const response = await fetch(`${API_URL}/auth/logout`, {
       method: "POST",
-      credentials: "include", // important to send cookies
+      credentials: "include",
     });
     console.log("Backend logout response:", response.status);
     localStorage.removeItem("token");
@@ -98,11 +98,10 @@ export default function Header() {
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 Welcome, <span className="font-semibold">{user.username}</span>
               </span>
-
               {user.role === "admin" && (
                 <Link
                   href="/admin"
-                  className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition text-sm"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium"
                 >
                   Admin Panel
                 </Link>

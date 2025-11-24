@@ -2,9 +2,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen p-8 bg-zinc-50 dark:bg-gray-900 text-black dark:text-white">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-red-600 mb-6">
-          🚨 Admin Panel 🚨
-        </h1>
+        <h1 className="text-4xl font-bold text-red-600 mb-6">Admin Panel</h1>
         <p className="text-lg text-gray-700 dark:text-gray-300">
           This page is protected! Only users with the &apos;admin&apos; role can
           see this content, thanks to the **Next.js Middleware** security check.
