@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
+import jwt from "jsonwebtoken";
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -19,10 +20,10 @@ export async function POST(req, { params }) {
     }
 
     // Verifying token
-    const jwt = require("jsonwebtoken");
+    // const jwt = require("jsonwebtoken");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const { id } = params;
+    const { id } = await params;
     const user_id = decoded.user_id;
 
     // Get the current task

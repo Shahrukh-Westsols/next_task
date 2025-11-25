@@ -12,6 +12,8 @@ const pool = new Pool({
 
 export async function PUT(req, { params }) {
   try {
+    console.log("PUT - params:", params);
+    console.log("PUT - id from params:", params.id);
     const token = req.cookies.get("token")?.value;
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -20,7 +22,7 @@ export async function PUT(req, { params }) {
     const user_id = decoded.user_id;
 
     const { content, completed } = await req.json();
-    const { id } = params;
+    const { id } = await params;
 
     const updateRes = await pool.query(
       "UPDATE tasks SET content=$1, completed=$2 WHERE tasks_id=$3 AND user_id=$4 RETURNING *",
@@ -43,6 +45,8 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
+    console.log("DELETE - params:", params);
+    console.log("DELETE - id from params:", params.id);
     const token = req.cookies.get("token")?.value;
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -50,7 +54,7 @@ export async function DELETE(req, { params }) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user_id = decoded.user_id;
 
-    const { id } = params;
+    const { id } = await params;
 
     const deleteRes = await pool.query(
       "DELETE FROM tasks WHERE tasks_id=$1 AND user_id=$2 RETURNING *",

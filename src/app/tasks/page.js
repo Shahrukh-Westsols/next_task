@@ -29,7 +29,7 @@ export default function TasksPage() {
     if (!newTask.trim()) return;
 
     try {
-      const res = await fetch("/api/tasks", {
+      const res = await fetch(`/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -138,6 +138,7 @@ export default function TasksPage() {
         },
         credentials: "include",
         body: JSON.stringify({
+          task_id: task.tasks_id,
           content: newContent,
           completed: task.completed,
         }),
@@ -220,7 +221,7 @@ export default function TasksPage() {
 
       try {
         // const res = await fetch(`${API_URL}/tasks?user_id=${user.user_id}`, {
-        const res = await fetch("/api/tasks", {
+        const res = await fetch(`/api/tasks`, {
           headers: {
             // Authorization: `Bearer ${token}`,
           },
