@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "../../../lib/db";
 import bcrypt from "bcrypt";
-
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   try {
@@ -37,8 +36,14 @@ export async function POST(req) {
       );
     }
 
+    // ✅ Include email in JWT payload
     const token = jwt.sign(
-      { user_id: user.user_id, username: user.username, role: user.role },
+      {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email, // added
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -51,12 +56,12 @@ export async function POST(req) {
           email: user.email,
           role: user.role,
         },
-        token, // optional for client-side storage
         message: "Login successful",
       },
       { status: 200 }
     );
 
+    // Set HttpOnly cookie
     response.cookies.set("token", token, {
       httpOnly: true,
       //secure: process.env.NODE_ENV === "production", // HTTPS only in prod
@@ -64,6 +69,7 @@ export async function POST(req) {
       maxAge: 60 * 60 * 24, // 1 day
       // maxAge: 15 * 60, // 15 minutes
       path: "/",
+      sameSite: "lax",
     });
 
     return response;
