@@ -82,8 +82,13 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl">
         <div className="text-center">
           <h1 className="text-5xl font-bold mb-6 spiral-text">
-            {user ? `Welcome back, ${user.username}!` : "Welcome to TaskFlow"}
+            {user
+              ? `Welcome back, ${
+                  user.username.charAt(0).toUpperCase() + user.username.slice(1)
+                }!`
+              : "Welcome to TaskFlow"}
           </h1>
+
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
             {user
               ? "Continue managing your tasks and stay productive."
