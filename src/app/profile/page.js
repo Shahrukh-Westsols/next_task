@@ -80,9 +80,7 @@ export default function ProfilePage() {
           <div className="p-4 bg-indigo-100 dark:bg-indigo-900/50 rounded-full mb-4">
             <User className="w-10 h-10 text-indigo-600 dark:text-indigo-300" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            User Profile
-          </h1>
+          <h1 className="text-5xl font-bold mb-4 spiral-text">User Profile</h1>
           <span
             className={`mt-2 px-4 py-1 text-sm font-semibold rounded-full border ${currentRoleStyle}`}
           >

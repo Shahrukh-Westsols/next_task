@@ -97,16 +97,21 @@ export default function Header() {
           {user ? (
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Welcome, <span className="font-semibold">{user.username}</span>
+                Welcome,{" "}
+                <span className="font-semibold">
+                  {user.username.charAt(0).toUpperCase() +
+                    user.username.slice(1)}
+                </span>
               </span>
-              {user.role === "admin" && (
+
+              {/* {user.role === "admin" && (
                 <Link
                   href="/admin"
                   className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium shadow-md whitespace-nowrap"
                 >
                   Admin Panel
                 </Link>
-              )}
+              )} */}
 
               <button
                 onClick={handleLogoutClick}

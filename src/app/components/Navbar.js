@@ -36,6 +36,15 @@ export default function Navbar({ user = null }) {
         My Tasks
       </Link>
 
+      <Link
+        href="/profile"
+        className={`px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-linear-to-r hover:from-blue-600 hover:to-purple-600 rounded-lg transition-all duration-300 font-medium ${
+          user ? "block" : "hidden"
+        }`}
+      >
+        Profile
+      </Link>
+
       {user?.role === "admin" && (
         <Link
           href="/admin"
