@@ -10,8 +10,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// GET /api/tasks
-export async function GET(req) {
+export async function PUT(req, { params }) {
   try {
     const token = req.cookies.get("token")?.value;
     if (!token)
@@ -20,20 +19,29 @@ export async function GET(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user_id = decoded.user_id;
 
-    const tasksQuery = await pool.query(
-      "SELECT * FROM tasks WHERE user_id = $1 ORDER BY position ASC",
-      [user_id]
+    const { content, completed } = await req.json();
+    const { id } = params;
+
+    const updateRes = await pool.query(
+      "UPDATE tasks SET content=$1, completed=$2 WHERE tasks_id=$3 AND user_id=$4 RETURNING *",
+      [content, completed, id, user_id]
     );
 
-    return NextResponse.json({ tasks: tasksQuery.rows });
+    if (updateRes.rows.length === 0) {
+      return NextResponse.json({ message: "Task not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      task: updateRes.rows[0],
+      message: "Task updated successfully",
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
-// POST /api/tasks
-export async function POST(req) {
+export async function DELETE(req, { params }) {
   try {
     const token = req.cookies.get("token")?.value;
     if (!token)
@@ -42,29 +50,20 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user_id = decoded.user_id;
 
-    const { content } = await req.json();
-    if (!content || !content.trim()) {
-      return NextResponse.json(
-        { message: "Task content is required" },
-        { status: 400 }
-      );
+    const { id } = params;
+
+    const deleteRes = await pool.query(
+      "DELETE FROM tasks WHERE tasks_id=$1 AND user_id=$2 RETURNING *",
+      [id, user_id]
+    );
+
+    if (deleteRes.rows.length === 0) {
+      return NextResponse.json({ message: "Task not found" }, { status: 404 });
     }
 
-    // Determine next position
-    const posRes = await pool.query(
-      "SELECT COALESCE(MAX(position), 0) + 1 AS next_pos FROM tasks WHERE user_id = $1",
-      [user_id]
-    );
-    const position = posRes.rows[0].next_pos;
-
-    const insertRes = await pool.query(
-      "INSERT INTO tasks (user_id, content, completed, position) VALUES ($1, $2, false, $3) RETURNING *",
-      [user_id, content, position]
-    );
-
     return NextResponse.json({
-      task: insertRes.rows[0],
-      message: "Task created successfully",
+      task: deleteRes.rows[0],
+      message: "Task deleted successfully",
     });
   } catch (err) {
     console.error(err);

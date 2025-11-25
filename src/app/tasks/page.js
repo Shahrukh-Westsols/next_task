@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Popup from "../components/Popup";
 
 export default function TasksPage() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,7 +29,7 @@ export default function TasksPage() {
     if (!newTask.trim()) return;
 
     try {
-      const res = await fetch(`${API_URL}/tasks`, {
+      const res = await fetch("/api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export default function TasksPage() {
 
     // const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${API_URL}/tasks/${taskToDelete}`, {
+      const res = await fetch(`/api/tasks/${taskToDelete}`, {
         method: "DELETE",
         headers: {
           // Authorization: `Bearer ${token}`,
@@ -102,7 +102,7 @@ export default function TasksPage() {
     // const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/tasks/${id}`, {
+      const res = await fetch(`/api/tasks/${id}`, {
         method: "DELETE",
         headers: {
           // Authorization: `Bearer ${token}`,
@@ -130,7 +130,7 @@ export default function TasksPage() {
     if (!newContent) return;
 
     try {
-      const res = await fetch(`${API_URL}/tasks/${task.tasks_id}`, {
+      const res = await fetch(`/api/tasks/${task.tasks_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export default function TasksPage() {
     // const token = localStorage.getItem("token");
 
     // Update backend
-    await fetch(`${API_URL}/tasks/${id}/move-up`, {
+    await fetch(`/api/tasks/${id}/move-up`, {
       method: "POST",
       credentials: "include",
       // headers: {
@@ -185,7 +185,7 @@ export default function TasksPage() {
     // const token = localStorage.getItem("token");
 
     // Update backend
-    await fetch(`${API_URL}/tasks/${id}/move-down`, {
+    await fetch(`/api/tasks/${id}/move-down`, {
       method: "POST",
       credentials: "include",
       // headers: {
@@ -220,7 +220,7 @@ export default function TasksPage() {
 
       try {
         // const res = await fetch(`${API_URL}/tasks?user_id=${user.user_id}`, {
-        const res = await fetch(`${API_URL}/tasks`, {
+        const res = await fetch("/api/tasks", {
           headers: {
             // Authorization: `Bearer ${token}`,
           },
@@ -247,7 +247,7 @@ export default function TasksPage() {
     };
 
     fetchTasks();
-  }, [user, API_URL]);
+  }, [user]);
 
   if (loading)
     return (
@@ -301,21 +301,18 @@ export default function TasksPage() {
                   onChange={(e) => setEditingContent(e.target.value)}
                   onBlur={async () => {
                     // const token = localStorage.getItem("token");
-                    const res = await fetch(
-                      `${API_URL}/tasks/${task.tasks_id}`,
-                      {
-                        method: "PUT",
-                        headers: {
-                          "Content-Type": "application/json",
-                          // Authorization: `Bearer ${token}`,
-                        },
-                        credentials: "include",
-                        body: JSON.stringify({
-                          content: editingContent,
-                          completed: task.completed,
-                        }),
-                      }
-                    );
+                    const res = await fetch(`/api/tasks/${task.tasks_id}`, {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        // Authorization: `Bearer ${token}`,
+                      },
+                      credentials: "include",
+                      body: JSON.stringify({
+                        content: editingContent,
+                        completed: task.completed,
+                      }),
+                    });
                     const data = await res.json();
                     if (res.ok) {
                       setTasks(
