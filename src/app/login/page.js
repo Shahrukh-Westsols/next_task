@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import Popup from "../components/Popup";
+import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
 
 // my login validation schema
 const loginSchema = z.object({
@@ -26,6 +27,7 @@ export default function LoginPage() {
   // const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Initializing React Hook Form
   const {
@@ -129,7 +131,10 @@ export default function LoginPage() {
     <>
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black text-black dark:text-white">
         <div className="w-full max-w-md p-8 bg-white dark:bg-gray-900 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+          <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white flex items-center justify-center">
+            <LogIn className="w-6 h-6 mr-3 text-blue-600" />
+            Sign In
+          </h1>
           {/* {error && <p className="text-red-500 mb-4">{error}</p>} */}
           {errors.root && (
             <div className="p-3 mb-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
@@ -143,20 +148,17 @@ export default function LoginPage() {
             onSubmit={handleSubmit(handleLogin)}
           >
             <div>
+              <label className="text-base font-semibold mb-1 block">
+                Email
+              </label>
               <input
                 type="email"
-                placeholder="Enter valid Email"
-                //     value={email}
-                //     onChange={(e) => setEmail(e.target.value)}
-                //     className="p-3 border rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-black
-                // dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                //     required
-                //   />
+                placeholder="Enter your email"
                 {...register("email")}
-                className={`p-3 border rounded-lg w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
+                className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
                   errors.email
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 dark:border-gray-700 focus:ring-blue-500"
+                    : "border-blue-500 focus:ring-blue-500"
                 }`}
               />
               {errors.email && (
@@ -165,23 +167,33 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
+
             <div>
-              <input
-                type="password"
-                placeholder="Enter valid Password"
-                //     value={password}
-                //     onChange={(e) => setPassword(e.target.value)}
-                //     className="p-3 border rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800
-                // text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                //     required
-                //   />
-                {...register("password")}
-                className={`p-3 border rounded-lg w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
-                  errors.password
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 dark:border-gray-700 focus:ring-blue-500"
-                }`}
-              />
+              <label className="text-base font-semibold mb-1 block">
+                Password
+              </label>
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  {...register("password")}
+                  className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white pr-10 focus:outline-none focus:ring-2 ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-blue-500 focus:ring-blue-500"
+                  }`}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500">
                   {errors.password.message}
@@ -192,17 +204,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`p-3 text-white rounded-lg transition ${
+              className={`mx-auto w-32 py-2.5 text-white rounded-md transition flex items-center justify-center ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Logging in...
-                </div>
+                <>
+                  <Loader2 className="animate-spin mr-2" size={18} />
+                  Logging...
+                </>
               ) : (
                 "Login"
               )}
