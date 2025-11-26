@@ -49,11 +49,11 @@ export default function RegisterPage() {
 
   const handleRegister = async (data) => {
     setLoading(true);
-    // Showing loading toast immediately
     const registerToast = toast.loading("Creating your account...");
     // const registerToast = toast.loading("Creating your account...", { id: `register-${Date.now()}` });
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,14 +68,12 @@ export default function RegisterPage() {
           type: "server",
           message: output.message || "Registration failed",
         });
-        // ADDED: Update loading toast to error
         toast.error("Registration failed. Please try again.", {
           id: registerToast,
         });
         return;
       }
 
-      // CHANGED: Personalized success message
       toast.success(
         `Account created for ${data.username}! Redirecting to login...`,
         { id: registerToast }
@@ -88,7 +86,6 @@ export default function RegisterPage() {
         type: "server",
         message: "Something went wrong.",
       });
-      // ADDED: Update loading toast to error
       toast.error("Registration failed. Please try again.", {
         id: registerToast,
       });

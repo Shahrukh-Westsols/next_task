@@ -9,7 +9,7 @@ export default function ToastProvider() {
       position="bottom-center"
       reverseOrder={false}
       toastOptions={{
-        duration: 4500,
+        duration: 4000,
         style: {
           background: "rgb(255 255 255)", // Light mode background
           color: "rgb(17 24 39)", // Light mode text

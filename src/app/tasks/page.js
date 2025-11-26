@@ -51,7 +51,6 @@ export default function TasksPage() {
   });
 
   const handleAddTask = async ({ content }) => {
-    // Destructure content directly
     if (!content.trim()) return;
 
     // setApiError(null);
@@ -62,8 +61,10 @@ export default function TasksPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ content }), // FIX: Use content parameter
+        body: JSON.stringify({ content }),
       });
+      const addToast = toast.loading("Adding task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
@@ -74,10 +75,10 @@ export default function TasksPage() {
 
       if (!res.ok) {
         // setApiError(data.message || "Failed to add task");
-        toast.error(data.message || "Failed to add task");
+        toast.error(data.message || "Failed to add task", { id: addToast });
       } else {
         setTasks([...tasks, data.task]); // append new task
-        toast.success("Task added successfully!");
+        toast.success("Task added successfully!", { id: addToast });
         resetTaskForm(); // clear input via react-hook-form
       }
     } catch (err) {
@@ -100,14 +101,18 @@ export default function TasksPage() {
         method: "DELETE",
         credentials: "include",
       });
+      const deleteToast = toast.loading("Deleting task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to delete task");
         // setApiError(data.message || "Failed to delete task");
-        toast.error(data.message || "Failed to delete task");
+        toast.error(data.message || "Failed to delete task", {
+          id: deleteToast,
+        });
       } else {
         setTasks(tasks.filter((task) => task.tasks_id !== taskToDelete));
-        toast.success("Task deleted successfully!");
+        toast.success("Task deleted successfully!", { id: deleteToast });
       }
     } catch (err) {
       console.error("Error confirming deletion:", err);
@@ -139,16 +144,20 @@ export default function TasksPage() {
           completed: newCompleted,
         }),
       });
+      const toggleToast = toast.loading("Updating task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to update completion status");
         // setApiError("Failed to update task completion status.");
-        toast.error("Failed to update task completion status.");
+        toast.error("Failed to update task completion status.", {
+          id: toggleToast,
+        });
       } else {
         setTasks(
           tasks.map((t) => (t.tasks_id === task.tasks_id ? data.task : t))
         );
-        toast.success("Task status updated!");
+        toast.success("Task status updated!", { id: toggleToast });
       }
     } catch (err) {
       console.error("Error toggling completion:", err);
@@ -164,7 +173,6 @@ export default function TasksPage() {
 
   const handleSaveEdit = useCallback(
     async (task) => {
-      // Check for empty content or no change
       if (!editingContent.trim() || editingContent === task.content) {
         setEditingTaskId(null);
         return;
@@ -182,16 +190,18 @@ export default function TasksPage() {
             completed: task.completed,
           }),
         });
+        const editToast = toast.loading("Updating task...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         const data = await res.json();
         if (res.ok) {
           setTasks(
             tasks.map((t) => (t.tasks_id === task.tasks_id ? data.task : t))
           );
-          toast.success("Task updated successfully!");
+          toast.success("Task updated successfully!", { id: editToast });
         } else {
           console.error(data.message || "Failed to save update");
           // setApiError("Failed to save task update.");
-          toast.error("Failed to save task update.");
+          toast.error("Failed to save task update.", { id: editToast });
         }
       } catch (err) {
         console.error("Error saving task:", err);

@@ -37,10 +37,10 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    // Show loading toast for logout
     const logoutToast = toast.loading("Logging out...");
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -49,16 +49,13 @@ export default function ProfilePage() {
       if (!res.ok) console.warn("Logout API call failed, continuing...");
 
       localStorage.removeItem("user"); // optional, just in case
-      // Success toast before redirect
       toast.success("Logged out successfully!", { id: logoutToast });
 
-      // Short delay to show success message before redirect
       setTimeout(() => {
         window.location.href = "/login";
       }, 500);
     } catch (err) {
       console.error("Error during logout:", err);
-      // Error toast for logout failure
       toast.error("Logout failed. Please try again.", { id: logoutToast });
       setIsLoggingOut(false);
     }

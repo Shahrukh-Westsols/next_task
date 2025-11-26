@@ -28,6 +28,8 @@ export default function Header() {
 
   const confirmLogout = async () => {
     try {
+      const logoutToast = toast.loading("Logging out...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const response = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -38,10 +40,8 @@ export default function Header() {
       setUser(null);
       setShowLogoutPopup(false);
 
-      // ADDED: Success toast after logout
       toast.success("Logged out successfully!");
 
-      // Short delay to show success message before redirect
       setTimeout(() => {
         window.location.href = "/";
       }, 500);

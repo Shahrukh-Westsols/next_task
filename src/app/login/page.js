@@ -49,11 +49,11 @@ export default function LoginPage() {
     //e.preventDefault(); // Prevent page reload
     // setError("");
     setLoading(true);
-    // ADDED: Show loading toast immediately
     const loginToast = toast.loading("Attempting to log in...");
 
     try {
       // const res = await fetch(`${API_URL}/auth/login`, {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -76,7 +76,6 @@ export default function LoginPage() {
           message:
             responseData.message || "Login failed. Check your credentials.",
         });
-        // ADDED: Update loading toast to error
         toast.error(responseData.message || "Login failed!", {
           id: loginToast,
         });
@@ -86,14 +85,12 @@ export default function LoginPage() {
       // Storing user in localStorage for UI
       // localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("user", JSON.stringify(responseData.user));
-      // CHANGED: Personalized success message
       toast.success(`Welcome back, ${responseData.user.username}!`, {
         id: loginToast,
       });
 
       console.log("Login response data:", responseData);
 
-      // ADDED: Smart redirect logic
       const redirectPath =
         document.cookie
           .split("; ")
