@@ -24,13 +24,23 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
-  // const [apiError, setApiError] = useState(null); // New state for action-based errors
-
+  // const [apiError, setApiError] = useState(null);
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
-
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+    } catch {
+      setUser(null);
+    }
+  }, []);
 
   const {
     register: taskRegister,
@@ -41,20 +51,22 @@ export default function TasksPage() {
     resolver: zodResolver(taskSchema),
   });
 
-  const [user] = useState(() => {
-    try {
-      const userData = localStorage.getItem("user");
-      return userData ? JSON.parse(userData) : null;
-    } catch {
-      return null;
-    }
-  });
+  // const [user] = useState(() => {
+  //   try {
+  //     const userData = localStorage.getItem("user");
+  //     return userData ? JSON.parse(userData) : null;
+  //   } catch {
+  //     return null;
+  //   }
+  // });
 
   const handleAddTask = async ({ content }) => {
     if (!content.trim()) return;
 
     // setApiError(null);
     try {
+      const addToast = toast.loading("Adding task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch(`/api/tasks`, {
         method: "POST",
         headers: {
@@ -63,9 +75,6 @@ export default function TasksPage() {
         credentials: "include",
         body: JSON.stringify({ content }),
       });
-      const addToast = toast.loading("Adding task...");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error("Server did not return JSON");
@@ -97,12 +106,12 @@ export default function TasksPage() {
     if (!taskToDelete) return;
     // setApiError(null);
     try {
+      const deleteToast = toast.loading("Deleting task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch(`/api/tasks/${taskToDelete}`, {
         method: "DELETE",
         credentials: "include",
       });
-      const deleteToast = toast.loading("Deleting task...");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to delete task");
@@ -133,6 +142,8 @@ export default function TasksPage() {
     const newCompleted = !task.completed;
     // setApiError(null);
     try {
+      const toggleToast = toast.loading("Updating task...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const res = await fetch(`/api/tasks/${task.tasks_id}`, {
         method: "PUT",
         headers: {
@@ -144,8 +155,6 @@ export default function TasksPage() {
           completed: newCompleted,
         }),
       });
-      const toggleToast = toast.loading("Updating task...");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to update completion status");
@@ -179,6 +188,8 @@ export default function TasksPage() {
       }
       // setApiError(null);
       try {
+        const editToast = toast.loading("Updating task...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         const res = await fetch(`/api/tasks/${task.tasks_id}`, {
           method: "PUT",
           headers: {
@@ -190,8 +201,6 @@ export default function TasksPage() {
             completed: task.completed,
           }),
         });
-        const editToast = toast.loading("Updating task...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
         const data = await res.json();
         if (res.ok) {
           setTasks(
