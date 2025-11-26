@@ -5,8 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import Popup from "../components/Popup";
+// import Popup from "../components/Popup";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { toast } from "../components/toast";
 
 // Schema
 const registerSchema = z
@@ -35,7 +36,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const {
     register,
@@ -48,6 +49,9 @@ export default function RegisterPage() {
 
   const handleRegister = async (data) => {
     setLoading(true);
+    // Showing loading toast immediately
+    const registerToast = toast.loading("Creating your account...");
+    // const registerToast = toast.loading("Creating your account...", { id: `register-${Date.now()}` });
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -64,14 +68,29 @@ export default function RegisterPage() {
           type: "server",
           message: output.message || "Registration failed",
         });
+        // ADDED: Update loading toast to error
+        toast.error("Registration failed. Please try again.", {
+          id: registerToast,
+        });
         return;
       }
 
-      setShowSuccessPopup(true);
+      // CHANGED: Personalized success message
+      toast.success(
+        `Account created for ${data.username}! Redirecting to login...`,
+        { id: registerToast }
+      );
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
     } catch (e) {
       setFormError("root", {
         type: "server",
         message: "Something went wrong.",
+      });
+      // ADDED: Update loading toast to error
+      toast.error("Registration failed. Please try again.", {
+        id: registerToast,
       });
     } finally {
       setLoading(false);
@@ -227,12 +246,12 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <Popup
+      {/* <Popup
         isOpen={showSuccessPopup}
         message="Registration successful! Click OK to login."
         onConfirm={() => (window.location.href = "/login")}
         onCancel={null}
-      />
+      /> */}
     </>
   );
 }

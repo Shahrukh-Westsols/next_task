@@ -13,6 +13,8 @@ import {
   ChevronDown, // For move down
 } from "lucide-react";
 import Popup from "../components/Popup";
+import { toast } from "../components/toast";
+import { TaskSkeleton } from "../components/loader";
 
 const taskSchema = z.object({
   content: z.string().min(1, "Task cannot be empty"),
@@ -22,7 +24,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
-  const [apiError, setApiError] = useState(null); // New state for action-based errors
+  // const [apiError, setApiError] = useState(null); // New state for action-based errors
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
@@ -52,7 +54,7 @@ export default function TasksPage() {
     // Destructure content directly
     if (!content.trim()) return;
 
-    setApiError(null);
+    // setApiError(null);
     try {
       const res = await fetch(`/api/tasks`, {
         method: "POST",
@@ -71,14 +73,17 @@ export default function TasksPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setApiError(data.message || "Failed to add task");
+        // setApiError(data.message || "Failed to add task");
+        toast.error(data.message || "Failed to add task");
       } else {
         setTasks([...tasks, data.task]); // append new task
+        toast.success("Task added successfully!");
         resetTaskForm(); // clear input via react-hook-form
       }
     } catch (err) {
       console.error(err);
-      setApiError("Something went wrong while adding task.");
+      // setApiError("Something went wrong while adding task.");
+      toast.error("Something went wrong while adding task.");
     }
   };
 
@@ -89,7 +94,7 @@ export default function TasksPage() {
 
   const confirmDelete = async () => {
     if (!taskToDelete) return;
-    setApiError(null);
+    // setApiError(null);
     try {
       const res = await fetch(`/api/tasks/${taskToDelete}`, {
         method: "DELETE",
@@ -98,13 +103,16 @@ export default function TasksPage() {
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to delete task");
-        setApiError(data.message || "Failed to delete task");
+        // setApiError(data.message || "Failed to delete task");
+        toast.error(data.message || "Failed to delete task");
       } else {
         setTasks(tasks.filter((task) => task.tasks_id !== taskToDelete));
+        toast.success("Task deleted successfully!");
       }
     } catch (err) {
       console.error("Error confirming deletion:", err);
-      setApiError("Something went wrong while deleting task.");
+      // setApiError("Something went wrong while deleting task.");
+      toast.error("Something went wrong while deleting task.");
     } finally {
       setShowDeletePopup(false);
       setTaskToDelete(null);
@@ -118,7 +126,7 @@ export default function TasksPage() {
 
   const handleToggleCompleted = async (task) => {
     const newCompleted = !task.completed;
-    setApiError(null);
+    // setApiError(null);
     try {
       const res = await fetch(`/api/tasks/${task.tasks_id}`, {
         method: "PUT",
@@ -134,15 +142,18 @@ export default function TasksPage() {
       const data = await res.json();
       if (!res.ok) {
         console.error(data.message || "Failed to update completion status");
-        setApiError("Failed to update task completion status.");
+        // setApiError("Failed to update task completion status.");
+        toast.error("Failed to update task completion status.");
       } else {
         setTasks(
           tasks.map((t) => (t.tasks_id === task.tasks_id ? data.task : t))
         );
+        toast.success("Task status updated!");
       }
     } catch (err) {
       console.error("Error toggling completion:", err);
-      setApiError("Something went wrong while updating task status.");
+      // setApiError("Something went wrong while updating task status.");
+      toast.error("Something went wrong while updating task status.");
     }
   };
 
@@ -158,7 +169,7 @@ export default function TasksPage() {
         setEditingTaskId(null);
         return;
       }
-      setApiError(null);
+      // setApiError(null);
       try {
         const res = await fetch(`/api/tasks/${task.tasks_id}`, {
           method: "PUT",
@@ -176,13 +187,16 @@ export default function TasksPage() {
           setTasks(
             tasks.map((t) => (t.tasks_id === task.tasks_id ? data.task : t))
           );
+          toast.success("Task updated successfully!");
         } else {
           console.error(data.message || "Failed to save update");
-          setApiError("Failed to save task update.");
+          // setApiError("Failed to save task update.");
+          toast.error("Failed to save task update.");
         }
       } catch (err) {
         console.error("Error saving task:", err);
-        setApiError("Something went wrong while saving task.");
+        // setApiError("Something went wrong while saving task.");
+        toast.error("Something went wrong while saving task.");
       } finally {
         setEditingTaskId(null);
       }
@@ -191,14 +205,15 @@ export default function TasksPage() {
   );
 
   const handleMoveUp = async (id) => {
-    setApiError(null);
+    // setApiError(null);
     // Update backend (API call intentionally not awaited to keep UI responsive)
     fetch(`/api/tasks/${id}/move-up`, {
       method: "POST",
       credentials: "include",
     }).catch((err) => {
       console.error("Failed to move task up on server:", err);
-      setApiError("Failed to save task order change.");
+      // setApiError("Failed to save task order change.");
+      toast.error("Failed to save task order change.");
     });
 
     // Update UI locally
@@ -213,14 +228,15 @@ export default function TasksPage() {
   };
 
   const handleMoveDown = async (id) => {
-    setApiError(null);
+    // setApiError(null);
     // Update backend (API call intentionally not awaited to keep UI responsive)
     fetch(`/api/tasks/${id}/move-down`, {
       method: "POST",
       credentials: "include",
     }).catch((err) => {
       console.error("Failed to move task down on server:", err);
-      setApiError("Failed to save task order change.");
+      // setApiError("Failed to save task order change.");
+      toast.error("Failed to save task order change.");
     });
 
     // Update UI locally
@@ -236,7 +252,7 @@ export default function TasksPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      setApiError(null); // Clear action errors
+      // setApiError(null); // Clear action errors
       setFetchError(""); // Clear fetch errors
       if (!user) {
         // If user data isn't available, we might still proceed if middleware handles auth,
@@ -276,11 +292,48 @@ export default function TasksPage() {
     fetchTasks();
   }, [user]);
 
+  // if (loading)
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+  //       <Loader2 className="animate-spin h-12 w-12 text-indigo-500" />
+  //       <span className="ml-4 text-xl font-medium">Loading tasks...</span>
+  //     </div>
+  //   );
+
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-        <Loader2 className="animate-spin h-12 w-12 text-indigo-500" />
-        <span className="ml-4 text-xl font-medium">Loading tasks...</span>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 sm:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8 text-center">
+            <h1 className="text-5xl font-bold mb-6 spiral-text">
+              Task Manager
+            </h1>
+            {user && (
+              <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                Welcome back,{" "}
+                <span className="font-bold text-indigo-700 dark:text-indigo-300">
+                  {user.username}
+                </span>
+                ! Loading your tasks...
+              </p>
+            )}
+          </div>
+
+          {/* Skeleton for task form */}
+          <div className="mb-8 flex gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 animate-pulse">
+            <div className="flex-1">
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            </div>
+            <div className="h-12 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+
+          {/* Skeleton task list */}
+          <ul className="space-y-4">
+            {[...Array(3)].map((_, index) => (
+              <TaskSkeleton key={index} />
+            ))}
+          </ul>
+        </div>
       </div>
     );
 
@@ -311,15 +364,13 @@ export default function TasksPage() {
           )}
         </div>
 
-        {/* API Action Error Display */}
-        {apiError && (
+        {/* {apiError && (
           <div className="p-4 mb-6 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 rounded-xl text-sm font-medium">
             <p className="font-bold">Action Failed:</p>
             <p>{apiError}</p>
           </div>
-        )}
+        )} */}
 
-        {/* Add Task Form */}
         <form
           className="mb-8 flex gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700"
           onSubmit={handleTaskSubmit(handleAddTask)}

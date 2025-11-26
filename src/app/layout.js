@@ -1,6 +1,7 @@
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ToastProvider from "./components/toast";
 
 export const metadata = {
   title: "Task App",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
         <Header />
         <main className="p-8">{children}</main>
         <Footer />
+        <ToastProvider />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Popup from "./Popup";
+import { toast } from "./toast";
 
 export default function Header() {
   // const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -26,20 +27,29 @@ export default function Header() {
   };
 
   const confirmLogout = async () => {
-    // Removing token from cookies and local storage
-    // document.cookie =
-    //   "token=; Path=/; SameSite=Lax; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-    // const response = await fetch(`${API_URL}/auth/logout`, {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    console.log("Backend logout response:", response.status);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    setShowLogoutPopup(false);
-    window.location.href = "/";
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      console.log("Backend logout response:", response.status);
+      localStorage.removeItem("user");
+      setUser(null);
+      setShowLogoutPopup(false);
+
+      // ADDED: Success toast after logout
+      toast.success("Logged out successfully!");
+
+      // Short delay to show success message before redirect
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+      setShowLogoutPopup(false);
+    }
   };
 
   const cancelLogout = () => {

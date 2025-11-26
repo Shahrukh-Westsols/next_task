@@ -5,8 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import Popup from "../components/Popup";
+// import Popup from "../components/Popup";
 import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "../components/toast";
 
 // my login validation schema
 const loginSchema = z.object({
@@ -26,7 +27,7 @@ export default function LoginPage() {
   // const [password, setPassword] = useState("");
   // const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Initializing React Hook Form
@@ -48,6 +49,8 @@ export default function LoginPage() {
     //e.preventDefault(); // Prevent page reload
     // setError("");
     setLoading(true);
+    // ADDED: Show loading toast immediately
+    const loginToast = toast.loading("Attempting to log in...");
 
     try {
       // const res = await fetch(`${API_URL}/auth/login`, {
@@ -70,7 +73,12 @@ export default function LoginPage() {
       if (!res.ok) {
         setFormError("root", {
           type: "server",
-          message: responseData.message || "Login failed",
+          message:
+            responseData.message || "Login failed. Check your credentials.",
+        });
+        // ADDED: Update loading toast to error
+        toast.error(responseData.message || "Login failed!", {
+          id: loginToast,
         });
         return;
       }
@@ -78,9 +86,25 @@ export default function LoginPage() {
       // Storing user in localStorage for UI
       // localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("user", JSON.stringify(responseData.user));
-      setShowSuccessPopup(true);
+      // CHANGED: Personalized success message
+      toast.success(`Welcome back, ${responseData.user.username}!`, {
+        id: loginToast,
+      });
 
       console.log("Login response data:", responseData);
+
+      // ADDED: Smart redirect logic
+      const redirectPath =
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("redirectPath="))
+          ?.split("=")[1] || "/";
+
+      document.cookie = "redirectPath=; Max-Age=0; path=/";
+
+      setTimeout(() => {
+        window.location.href = redirectPath;
+      }, 500);
 
       // if (!data.token) {
       //   setError("No token received from server");
@@ -108,11 +132,13 @@ export default function LoginPage() {
       //   setError("Something went wrong. Please try again.");
       // }
     } catch (err) {
-      console.error(err);
+      console.error("Login Network Error:", err);
       setFormError("root", {
         type: "server",
-        message: "Something went wrong. Please try again.",
+        message: "Network error. Please try again.",
       });
+      // ADDED: Update loading toast to network error
+      toast.error("Network error. Could not reach server.", { id: loginToast });
     } finally {
       setLoading(false);
     }
@@ -122,10 +148,10 @@ export default function LoginPage() {
     // localStorage.setItem("tokenExpiry", tokenExpiry.toString());
   };
 
-  const handlePopupConfirm = () => {
-    setShowSuccessPopup(false);
-    window.location.href = "/";
-  };
+  // const handlePopupConfirm = () => {
+  //   setShowSuccessPopup(false);
+  //   window.location.href = "/";
+  // };
 
   return (
     <>
@@ -222,7 +248,7 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            Don’t have an account?{" "}
+            Dont have an account?{" "}
             <Link href="/register" className="text-blue-600 hover:underline">
               Register
             </Link>
@@ -230,12 +256,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <Popup
+      {/* <Popup
         isOpen={showSuccessPopup}
         message="Login successful!"
         onConfirm={handlePopupConfirm}
         onCancel={null}
-      />
+      /> */}
     </>
   );
 }
