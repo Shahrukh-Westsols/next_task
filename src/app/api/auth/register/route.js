@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "../../../lib/db";
 import bcrypt from "bcrypt";
+import { AuditEvents } from "../../../lib/audit";
 
 const jwt = require("jsonwebtoken");
 
@@ -55,7 +56,7 @@ export async function POST(req) {
       },
       { status: 201 }
     );
-
+    await AuditEvents.loginSuccess(user.user_id, user.email);
     // response.cookies.set("token", token, {
     //   httpOnly: true,
     //   secure: process.env.NODE_ENV === "production",

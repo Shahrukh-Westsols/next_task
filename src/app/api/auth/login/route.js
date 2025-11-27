@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import pool from "../../../lib/db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { AuditEvents } from "../../../lib/audit";
 
 export async function POST(req) {
   try {
@@ -60,6 +61,7 @@ export async function POST(req) {
       },
       { status: 200 }
     );
+    await AuditEvents.loginSuccess(user.user_id, user.email);
 
     // Set HttpOnly cookie
     response.cookies.set("token", token, {
@@ -75,6 +77,7 @@ export async function POST(req) {
     return response;
   } catch (err) {
     console.error("Login Error:", err);
+    await AuditEvents.loginFailure(email, "Invalid credentials");
     return NextResponse.json(
       { message: "Internal Server Error during login" },
       { status: 500 }

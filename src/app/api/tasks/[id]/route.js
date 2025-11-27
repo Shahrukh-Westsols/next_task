@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
+import redis from "../../../lib/redis";
+import { AuditEvents } from "../../../lib/audit";
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -33,6 +35,12 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: "Task not found" }, { status: 404 });
     }
 
+    // ✅ ADD CACHE INVALIDATION & AUDIT LOGGING
+    const cacheKey = `tasks:user:${user_id}`;
+    await redis.del(cacheKey);
+    await AuditEvents.cacheInvalidation(user_id, cacheKey);
+    await AuditEvents.taskUpdated(user_id, id, { content, completed });
+
     return NextResponse.json({
       task: updateRes.rows[0],
       message: "Task updated successfully",
@@ -64,6 +72,12 @@ export async function DELETE(req, { params }) {
     if (deleteRes.rows.length === 0) {
       return NextResponse.json({ message: "Task not found" }, { status: 404 });
     }
+
+    // ✅ ADD CACHE INVALIDATION & AUDIT LOGGING
+    const cacheKey = `tasks:user:${user_id}`;
+    await redis.del(cacheKey);
+    await AuditEvents.cacheInvalidation(user_id, cacheKey);
+    await AuditEvents.taskDeleted(user_id, id);
 
     return NextResponse.json({
       task: deleteRes.rows[0],

@@ -319,75 +319,41 @@ export default function TasksPage() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      // setApiError(null); // Clear action errors
-      setFetchError(""); // Clear fetch errors
+      setFetchError("");
       if (!user) return;
 
       try {
-        // Attempt to get cached tasks from Redis per user
-        const cacheKey = `tasks:user-${user.user_id}`;
-        let source = "LIVE";
-        let cachedTasks = null;
+        // SIMPLIFY: Just call the main tasks API
+        const res = await fetch(`/api/tasks`, {
+          credentials: "include",
+        });
 
-        try {
-          const res = await fetch(`/api/tasks/redis/${cacheKey}`, {
-            credentials: "include",
-          });
-          const data = await res.json();
-          if (data.cached) {
-            cachedTasks = data.tasks; // fetched from Redis
-            source = "CACHED";
-          }
-        } catch (err) {
-          console.error("Redis fetch error, falling back to API:", err);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          console.error("Non-JSON response:", text);
+          setFetchError("Server error - please try again");
+          return;
         }
 
-        if (cachedTasks) {
-          setTasks(cachedTasks);
-          setCacheStatus(source);
+        const data = await res.json();
+
+        if (!res.ok) {
+          setFetchError(data.message || "Failed to fetch tasks");
         } else {
-          // If no cached data, fetch live from API
-          const res = await fetch(`/api/tasks`, { credentials: "include" });
-          const contentType = res.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
-            const text = await res.text();
-            console.error("Non-JSON response during fetch:", text);
-            setFetchError(
-              "Authentication failed or server error. Please log in again."
-            );
-            return;
-          }
-
-          const data = await res.json();
-          if (!res.ok) {
-            setFetchError(data.message || "Failed to fetch tasks");
-          } else {
-            setTasks(data.tasks);
-            setCacheStatus(source);
-          }
-
-          // Store fetched tasks in Redis for 30 seconds
-          try {
-            await fetch(`/api/tasks/cache/${cacheKey}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ tasks: data.tasks, ttl: 30 }),
-            });
-          } catch (err) {
-            console.error("Failed to cache tasks in Redis:", err);
-          }
+          setTasks(data.tasks);
+          setCacheStatus(data.source || "LIVE");
         }
       } catch (err) {
         console.error(err);
-        setFetchError("Something went wrong connecting to the server.");
+        setFetchError("Network error connecting to server");
       } finally {
         setLoading(false);
       }
     };
 
     fetchTasks();
-  }, [user]); //
+  }, [user]);
 
   // Clear cache and refresh tasks
   const handleClearCache = async () => {
