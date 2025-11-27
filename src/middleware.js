@@ -26,6 +26,14 @@ export function middleware(request) {
     return response;
   }
 
+  // Protect API routes
+  // if (pathname.startsWith("/api") && !token) {
+  //   return NextResponse.json(
+  //     { message: "Unauthorized: No token provided" },
+  //     { status: 401 }
+  //   );
+  // }
+
   // Admin route protection
   if (pathname.startsWith("/admin") && token) {
     try {
@@ -63,5 +71,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

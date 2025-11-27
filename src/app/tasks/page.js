@@ -11,6 +11,9 @@ import {
   Trash2, // For delete button
   ChevronUp, // For move up
   ChevronDown, // For move down
+  Zap,
+  RefreshCw,
+  Database,
 } from "lucide-react";
 import Popup from "../components/Popup";
 import { toast } from "../components/toast";
@@ -24,12 +27,15 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const totalTasks = tasks.length;
   // const [apiError, setApiError] = useState(null);
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [user, setUser] = useState(null);
+  const [cacheStatus, setCacheStatus] = useState(""); // "CACHED" or "LIVE"
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     try {
@@ -269,37 +275,108 @@ export default function TasksPage() {
     });
   };
 
+  // useEffect(() => {
+  //   const fetchTasks = async () => {
+  //     // setApiError(null); // Clear action errors
+  //     setFetchError(""); // Clear fetch errors
+  //     if (!user) {
+  //       return;
+  //     }
+
+  //     try {
+  //       const res = await fetch(`/api/tasks`, {
+  //         credentials: "include",
+  //       });
+
+  //       const contentType = res.headers.get("content-type");
+  //       if (!contentType || !contentType.includes("application/json")) {
+  //         // This usually indicates a redirect or proxy error
+  //         const text = await res.text();
+  //         console.error("Non-JSON response during fetch:", text);
+  //         setFetchError(
+  //           "Authentication failed or server error. Please log in again."
+  //         );
+  //         return;
+  //       }
+
+  //       const data = await res.json();
+
+  //       if (!res.ok) {
+  //         setFetchError(data.message || "Failed to fetch tasks");
+  //       } else {
+  //         setTasks(data.tasks);
+  //         setCacheStatus(data.source || "LIVE");
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       setFetchError("Something went wrong connecting to the server.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchTasks();
+  // }, [user]);
+
   useEffect(() => {
     const fetchTasks = async () => {
       // setApiError(null); // Clear action errors
       setFetchError(""); // Clear fetch errors
-      if (!user) {
-        // If user data isn't available, we might still proceed if middleware handles auth,
-        // but for now, just ensure we don't try to fetch if we are supposed to redirect.
-        // Assuming parent layout handles redirection based on auth status.
-      }
-      try {
-        const res = await fetch(`/api/tasks`, {
-          credentials: "include",
-        });
+      if (!user) return;
 
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          // This usually indicates a redirect or proxy error
-          const text = await res.text();
-          console.error("Non-JSON response during fetch:", text);
-          setFetchError(
-            "Authentication failed or server error. Please log in again."
-          );
-          return;
+      try {
+        // Attempt to get cached tasks from Redis per user
+        const cacheKey = `tasks:user-${user.user_id}`;
+        let source = "LIVE";
+        let cachedTasks = null;
+
+        try {
+          const res = await fetch(`/api/tasks/redis/${cacheKey}`, {
+            credentials: "include",
+          });
+          const data = await res.json();
+          if (data.cached) {
+            cachedTasks = data.tasks; // fetched from Redis
+            source = "CACHED";
+          }
+        } catch (err) {
+          console.error("Redis fetch error, falling back to API:", err);
         }
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          setFetchError(data.message || "Failed to fetch tasks");
+        if (cachedTasks) {
+          setTasks(cachedTasks);
+          setCacheStatus(source);
         } else {
-          setTasks(data.tasks);
+          // If no cached data, fetch live from API
+          const res = await fetch(`/api/tasks`, { credentials: "include" });
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("Non-JSON response during fetch:", text);
+            setFetchError(
+              "Authentication failed or server error. Please log in again."
+            );
+            return;
+          }
+
+          const data = await res.json();
+          if (!res.ok) {
+            setFetchError(data.message || "Failed to fetch tasks");
+          } else {
+            setTasks(data.tasks);
+            setCacheStatus(source);
+          }
+
+          // Store fetched tasks in Redis for 30 seconds
+          try {
+            await fetch(`/api/tasks/cache/${cacheKey}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ tasks: data.tasks, ttl: 30 }),
+            });
+          } catch (err) {
+            console.error("Failed to cache tasks in Redis:", err);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -308,8 +385,72 @@ export default function TasksPage() {
         setLoading(false);
       }
     };
+
     fetchTasks();
-  }, [user]);
+  }, [user]); //
+
+  // Clear cache and refresh tasks
+  const handleClearCache = async () => {
+    setIsRefreshing(true);
+    try {
+      const clearToast = toast.loading("Clearing cache...");
+
+      // Call API to clear cache
+      const res = await fetch("/api/tasks/clear-cache", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("Cache cleared successfully!", { id: clearToast });
+
+        // Refresh tasks (will fetch fresh from database)
+        const refreshRes = await fetch(`/api/tasks`, {
+          credentials: "include",
+        });
+        const data = await refreshRes.json();
+
+        if (refreshRes.ok) {
+          setTasks(data.tasks);
+          setCacheStatus(data.source || "LIVE");
+        }
+      } else {
+        toast.error("Failed to clear cache", { id: clearToast });
+      }
+    } catch (error) {
+      console.error("Clear cache error:", error);
+      toast.error("Error clearing cache");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Manual refresh (force fresh data)
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const refreshToast = toast.loading("Refreshing tasks...");
+
+      // Force refresh by adding timestamp to bypass cache
+      const res = await fetch(`/api/tasks?refresh=${Date.now()}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setTasks(data.tasks);
+        setCacheStatus(data.source || "LIVE");
+        toast.success("Tasks refreshed!", { id: refreshToast });
+      } else {
+        toast.error("Failed to refresh tasks", { id: refreshToast });
+      }
+    } catch (error) {
+      console.error("Refresh error:", error);
+      toast.error("Error refreshing tasks");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // if (loading)
   //   return (
@@ -323,7 +464,7 @@ export default function TasksPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 sm:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-8 text-center">
+          {/* <div className="mb-8 text-center">
             <h1 className="text-5xl font-bold mb-6 spiral-text">
               Task Manager
             </h1>
@@ -335,6 +476,69 @@ export default function TasksPage() {
                 </span>
                 ! Loading your tasks...
               </p>
+            )}
+          </div> */}
+          <div className="mb-8 text-center">
+            <h1 className="text-5xl font-bold mb-6 spiral-text">
+              Task Manager
+            </h1>
+            {user && (
+              <div className="space-y-2">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Welcome back,{" "}
+                  <span className="font-bold text-indigo-700 dark:text-indigo-300">
+                    {user.username}
+                  </span>
+                  ! You have {totalTasks} task{totalTasks !== 1 ? "s" : ""} to
+                  manage.
+                </p>
+
+                {/* CACHE STATUS BADGE - ADD THIS SECTION */}
+                {cacheStatus && (
+                  <div className="flex items-center justify-center gap-2">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        cacheStatus.includes("CACHED")
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : cacheStatus.includes("Redis Down")
+                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                          : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                      }`}
+                    >
+                      {cacheStatus.includes("CACHED") ? (
+                        <Zap className="w-3 h-3 mr-1" />
+                      ) : (
+                        <Database className="w-3 h-3 mr-1" />
+                      )}
+                      Data: {cacheStatus}
+                    </span>
+
+                    {/* CACHE CONTROLS - ADD THESE BUTTONS */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className="inline-flex items-center px-3 py-1 text-sm bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition disabled:opacity-50"
+                      >
+                        <RefreshCw
+                          className={`w-3 h-3 mr-1 ${
+                            isRefreshing ? "animate-spin" : ""
+                          }`}
+                        />
+                        Refresh
+                      </button>
+
+                      <button
+                        onClick={handleClearCache}
+                        disabled={isRefreshing}
+                        className="inline-flex items-center px-3 py-1 text-sm bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50 transition disabled:opacity-50"
+                      >
+                        Clear Cache
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -363,8 +567,6 @@ export default function TasksPage() {
         <p>{fetchError}</p>
       </div>
     );
-
-  const totalTasks = tasks.length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 sm:p-8">
