@@ -170,7 +170,7 @@ export default function LoginPage() {
             className="flex flex-col gap-4"
             onSubmit={handleSubmit(handleLogin)}
           >
-            <div>
+            <div className="max-w-xs mx-auto w-full">
               <label className="text-base font-semibold mb-1 block">
                 Email
               </label>
@@ -191,7 +191,7 @@ export default function LoginPage() {
               )}
             </div>
 
-            <div>
+            <div className="max-w-xs mx-auto w-full">
               <label className="text-base font-semibold mb-1 block">
                 Password
               </label>
