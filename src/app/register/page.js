@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +38,8 @@ export default function RegisterPage() {
   const [showPassword2, setShowPassword2] = useState(false);
   // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
+  const blobRef = useRef(null);
+
   const {
     register,
     handleSubmit,
@@ -46,6 +48,25 @@ export default function RegisterPage() {
   } = useForm({
     resolver: zodResolver(registerSchema),
   });
+
+  // Mouse move effect for the blob
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (blobRef.current) {
+        const { clientX, clientY } = e;
+        blobRef.current.animate(
+          {
+            left: `${clientX}px`,
+            top: `${clientY}px`,
+          },
+          { duration: 3000, fill: "forwards" }
+        );
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   const handleRegister = async (data) => {
     setLoading(true);
@@ -96,8 +117,35 @@ export default function RegisterPage() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="w-full max-w-md p-8 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        {/* Your Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
+
+        {/* Modern gradient background */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(0,0,0,0))]"></div>
+
+        {/* Animated Waves */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Single wave that starts from center behind form and expands */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white dark:bg-white/20 animate-single-wave" />
+        </div>
+
+        {/* Your Floating Elements */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+
+        {/* Mouse Following Blob */}
+        <div
+          ref={blobRef}
+          className="absolute w-80 h-80 bg-linear-to-r from-blue-300 to-purple-400 dark:from-blue-400 dark:to-purple-500 rounded-full opacity-40 blur-3xl pointer-events-none transition-transform duration-3000 -translate-x-1/2 -translate-y-1/2"
+          style={{
+            left: "50%",
+            top: "50%",
+          }}
+        />
+
+        {/* Form container with glass effect */}
+        <div className="relative z-10 w-full max-w-md p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50">
           <h1 className="text-3xl font-bold mb-6 flex items-center justify-center">
             <UserPlus className="w-6 h-6 mr-2 text-blue-600" />
             Register Account
@@ -120,10 +168,10 @@ export default function RegisterPage() {
               <input
                 type="text"
                 {...register("username")}
-                className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
+                className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 transition-all ${
                   errors.username
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-blue-500 focus:ring-blue-500"
+                    : "border-blue-500 focus:ring-blue-500 hover:border-blue-600"
                 }`}
                 placeholder="Enter full name"
               />
@@ -141,10 +189,10 @@ export default function RegisterPage() {
               <input
                 type="email"
                 {...register("email")}
-                className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
+                className={`p-2.5 border rounded-md w-full bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 transition-all ${
                   errors.email
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-blue-500 focus:ring-blue-500"
+                    : "border-blue-500 focus:ring-blue-500 hover:border-blue-600"
                 }`}
                 placeholder="Enter your email"
               />
@@ -163,10 +211,10 @@ export default function RegisterPage() {
                 <input
                   type={showPassword1 ? "text" : "password"}
                   {...register("password")}
-                  className={`p-2.5 border rounded-md w-full pr-10 bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
+                  className={`p-2.5 border rounded-md w-full pr-10 bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 transition-all ${
                     errors.password
                       ? "border-red-500 focus:ring-red-500"
-                      : "border-blue-500 focus:ring-blue-500"
+                      : "border-blue-500 focus:ring-blue-500 hover:border-blue-600"
                   }`}
                   placeholder="Enter password"
                 />
@@ -174,7 +222,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword1(!showPassword1)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   {showPassword1 ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -195,10 +243,10 @@ export default function RegisterPage() {
                 <input
                   type={showPassword2 ? "text" : "password"}
                   {...register("confirmPassword")}
-                  className={`p-2.5 border rounded-md w-full pr-10 bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 ${
+                  className={`p-2.5 border rounded-md w-full pr-10 bg-gray-50 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 transition-all ${
                     errors.confirmPassword
                       ? "border-red-500 focus:ring-red-500"
-                      : "border-blue-500 focus:ring-blue-500"
+                      : "border-blue-500 focus:ring-blue-500 hover:border-blue-600"
                   }`}
                   placeholder="Confirm password"
                 />
@@ -206,7 +254,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword2(!showPassword2)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   {showPassword2 ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -223,10 +271,10 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-8 py-2 text-white rounded-md font-medium ${
+                className={`px-8 py-3 text-white rounded-md font-medium transition-all duration-300 transform hover:scale-105 ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    : "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 }`}
               >
                 {loading ? "Creating..." : "Register"}
@@ -234,9 +282,12 @@ export default function RegisterPage() {
             </div>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
+            <Link
+              href="/login"
+              className="text-blue-600 hover:text-blue-700 font-medium transition-colors hover:underline"
+            >
               Login
             </Link>
           </p>

@@ -61,3 +61,21 @@ body {
 .spiral-text:hover {
   animation-duration: 4s;
 }
+
+/* Wave Animation*/
+@keyframes single-wave {
+  0% {
+    width: 100px;
+    height: 100px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 2000px;
+    height: 2000px;
+    opacity: 0;
+  }
+}
+
+.animate-single-wave {
+  animation: single-wave 4s ease-out infinite;
+}

@@ -1,56 +1,240 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TaskFlow - Advanced Task Management System
+
+A full-stack task management application with Redis caching, audit trails, secure authentication, and role-based access control.
+
+---
+
+## Features
+
+### Authentication & Authorization
+
+- JWT stored in HttpOnly cookies for secure session handling
+- Next.js Middleware used to protect private routes
+- Public routes: `/login`, `/register`
+- Protected routes: `/tasks`, `/profile`, `/dashboard`
+- Role-based access control (Admin vs Standard User)
+
+---
+
+## Task Management (Full CRUD)
+
+- Create, update, and delete tasks
+- Optimistic UI updates for responsive interactions
+- Task reordering (move up/down)
+- Real-time progress indicator
+- Support for both Server Actions and API Routes
+
+---
+
+## Redis Caching (Per-User Cache)
+
+- High-speed task loading using Redis
+- Cache stored per user using `cache:tasks:userId`
+- Cache TTL: 30 seconds
+- Cache automatically cleared whenever a task is created, updated, or deleted
+- UI badge shows whether data is from cache or live API
+- Manual cache clear button available
+
+### Caching Flow
+
+1. User opens `/tasks`
+2. Server checks Redis
+
+   - If cache exists → return cached tasks
+   - If not → fetch from backend API → store in Redis
+
+3. Any task modification clears that user’s cache
+4. Next request retrieves fresh data
+
+---
+
+## Audit Trail System
+
+A complete monitoring layer that records all significant system actions.
+
+### Logged Actions
+
+#### Authentication
+
+- Login success
+- Login failure
+- Logout
+
+#### Task Operations
+
+- Task created
+- Task updated
+- Task deleted
+
+#### Redis Events
+
+- Cache hit
+- Cache write
+- Cache invalidation
+
+### Log Entry Structure
+
+- User ID
+- Action name
+- Metadata (task ID, cache key, email, etc.)
+- Timestamp (ISO)
+
+---
+
+## Admin Audit Dashboard
+
+Accessible at: `/admin/audit-logs`
+
+### Dashboard Features
+
+- View detailed audit logs
+- Filter by user
+- Filter by action type
+- Pagination support
+- Efficient handling of large log datasets
+
+---
+
+## User Experience
+
+- Built with Next.js 14 (App Router)
+- TailwindCSS for styling
+- Zod and React Hook Form for form validation
+- Toast notifications
+- Loading indicators and responsive layout
+- Supports dark/light mode
+
+---
+
+## Tech Stack
+
+**Frontend:** Next.js, TailwindCSS, React Hook Form, Zod
+**Backend:** Node.js, Express, PostgreSQL, Redis, JWT, bcrypt
+
+---
 
 ## Getting Started
 
-# Task App Project
+### Prerequisites
 
-## Frontend
+- Node.js 18 or higher
+- PostgreSQL
+- Redis
 
-- Built with Next.js
+### Running the Application
+
+You must run both frontend and backend using two separate terminals.
+
+#### Terminal 1 — Frontend (Next.js)
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-- `npm run dev` to start
+#### Terminal 2 — Backend (Node.js)
 
-## Backend
+```bash
+cd task_management_server
+npm install
+node server.js
+```
 
-- Node.js server in task_management_server
-- `node server.js` to run backend
+---
 
-you need 2 terminals in vs code in order to run both so we the project runs
-by default you will be in task_app so you can run
+## Application URLs
 
-- `npm run dev` to start
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Backend API: [http://localhost:3001](http://localhost:3001)
 
-for backend open new terminal go to cd task_management_server
+---
 
-- `node server.js` to run backend
+## Environment Configuration
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Backend (`task_management_server/.env`)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```env
+DB_USER=your_db_user
+DB_HOST=localhost
+DB_NAME=task_management
+DB_PASSWORD=your_db_password
+DB_PORT=5432
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+JWT_SECRET=your_jwt_secret_key
 
-## Learn More
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Frontend (`task_app/.env.local`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+task_app/
+├── app/
+│   ├── tasks/          # Task CRUD + caching
+│   ├── admin/          # Audit log dashboard
+│   ├── api/            # API routes (if used)
+│   └── lib/            # Redis and audit helpers
+├── middleware.js        # Protected route logic
+└── components/          # Shared UI components
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+task_management_server/
+├── server.js            # Express backend
+└── routes/              # API endpoint definitions
+```
+
+---
+
+## API Endpoints
+
+### Authentication
+
+- POST `/api/auth/register`
+- POST `/api/auth/login`
+- POST `/api/auth/logout`
+
+### Tasks
+
+- GET `/api/tasks`
+- POST `/api/tasks`
+- PUT `/api/tasks/:id`
+- DELETE `/api/tasks/:id`
+
+### Admin
+
+- GET `/api/admin/audit-logs`
+
+---
+
+## Troubleshooting
+
+### Redis Not Connecting
+
+- Ensure Redis server is running
+
+  ```bash
+  redis-server
+  ```
+
+- Verify Redis credentials in `.env`
+
+### PostgreSQL Issues
+
+- Ensure PostgreSQL service is running
+- Check database name, username, and password
+
+### Middleware Blocking Pages
+
+- Ensure JWT cookie exists
+- Confirm that login and register pages are marked as public
+
+TaskFlow — a secure, efficient, and production-ready task management system.

@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const blobRef = useRef(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -21,10 +22,42 @@ export default function Home() {
     }
   }, []);
 
+  // Mouse move effect for the blob
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (blobRef.current) {
+        const { clientX, clientY } = e;
+        blobRef.current.animate(
+          {
+            left: `${clientX}px`,
+            top: `${clientY}px`,
+          },
+          { duration: 3000, fill: "forwards" }
+        );
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">
-        <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl">
+      <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center relative overflow-hidden">
+        {/* Enhanced Grid Background - More visible lines */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808015_1px,transparent_1px),linear-gradient(to_bottom,#80808015_1px,transparent_1px)] bg-size-[24px_24px]"></div>
+
+        {/* Small Mouse Following Blob */}
+        <div
+          ref={blobRef}
+          className="absolute w-40 h-40 bg-linear-to-r from-blue-200 to-purple-300 dark:from-blue-400 dark:to-purple-500 rounded-full opacity-30 blur-2xl pointer-events-none transition-transform duration-3000 -translate-x-1/2 -translate-y-1/2"
+          style={{
+            left: "50%",
+            top: "50%",
+          }}
+        />
+
+        <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl relative z-10">
           <div className="text-center">
             <h1 className="text-5xl font-bold mb-6 spiral-text">
               Welcome to TaskFlow
@@ -78,8 +111,21 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center">
-      <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl">
+    <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white flex flex-col items-center relative overflow-hidden">
+      {/* Enhanced Grid Background - More visible lines */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808015_1px,transparent_1px),linear-gradient(to_bottom,#80808015_1px,transparent_1px)] bg-size-[24px_24px]"></div>
+
+      {/* Small Mouse Following Blob */}
+      <div
+        ref={blobRef}
+        className="absolute w-40 h-40 bg-linear-to-r from-blue-200 to-purple-300 dark:from-blue-400 dark:to-purple-500 rounded-full opacity-30 blur-2xl pointer-events-none transition-transform duration-3000 -translate-x-1/2 -translate-y-1/2"
+        style={{
+          left: "50%",
+          top: "50%",
+        }}
+      />
+
+      <main className="flex flex-col items-center justify-center py-20 px-8 gap-12 w-full max-w-4xl relative z-10">
         <div className="text-center">
           <h1 className="text-5xl font-bold mb-6 spiral-text">
             {user
